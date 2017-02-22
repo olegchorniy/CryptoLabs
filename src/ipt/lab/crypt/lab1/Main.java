@@ -2,31 +2,33 @@ package ipt.lab.crypt.lab1;
 
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 
+import static java.lang.Integer.toHexString;
+
 public class Main {
 
     public static void main(String[] args) {
         HeysCipher heys = new HeysCipher(1);
 
-        byte[] data = {0x12, 0x34};
-        byte[] data2 = {0x56, 0x78};
+        short block1 = 0x3412;
+        short block2 = 0x7856;
 
-        byte[] key = {
-                0x00, 0x01,
-                0x02, 0x03,
-                0x04, 0x05,
-                0x06, 0x07,
-                0x08, 0x09,
-                0x10, 0x11,
-                0x12, 0x13
+        short[] key = {
+                0x0100,
+                0x0200,
+                0x0300,
+                0x0400,
+                0x0500,
+                0x0600,
+                0x0700
         };
 
-        dump(heys.encryptBlock(data, key));
-        dump(heys.encryptBlock(data2, key));
+        System.out.println(toHexString(heys.encrypt(block1, key) & 0xFFFF));
+        System.out.println(toHexString(heys.encrypt(block2, key) & 0xFFFF));
     }
 
     private static void dump(byte[] bytes) {
         for (byte value : bytes) {
-            System.out.print(padHex(Integer.toHexString(Byte.toUnsignedInt(value)).toUpperCase()));
+            System.out.print(padHex(toHexString(value & 0xFF).toUpperCase()));
             System.out.print(" ");
         }
         System.out.println();
