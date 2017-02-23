@@ -2,28 +2,58 @@ package ipt.lab.crypt.lab1;
 
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 
+import java.util.Arrays;
+import java.util.Random;
+
 import static java.lang.Integer.toHexString;
 
 public class Main {
 
+    public static final int BLOCKS_SIZE = 16;
+    public static final int BLOCKS_NUMBER = 1 << BLOCKS_SIZE; //0x10000
+    public static final int BLOCK_MASK = BLOCKS_NUMBER - 1; //0xFFFF
+
+    public static final Random rand = new Random();
+
     public static void main(String[] args) {
         HeysCipher heys = new HeysCipher(1);
 
-        short block1 = 0x3412;
-        short block2 = 0x7856;
+        int key = randomBlock();
 
-        short[] key = {
-                0x0100,
-                0x0200,
-                0x0300,
-                0x0400,
-                0x0500,
-                0x0600,
-                0x0700
-        };
+        System.out.println(key);
+        System.out.println(maxProb(key));
+    }
 
-        System.out.println(toHexString(heys.encrypt(block1, key) & 0xFFFF));
-        System.out.println(toHexString(heys.encrypt(block2, key) & 0xFFFF));
+    private static int maxProb(int key) {
+        HeysCipher heys = new HeysCipher(1);
+        int[][] counters = new int[BLOCKS_NUMBER][BLOCKS_NUMBER];
+
+        for (int a = 0; a < BLOCKS_NUMBER; a++) {
+            for (int block = 0; block < BLOCKS_NUMBER; block++) {
+
+                int b = heys.round(block, key) ^ heys.round(block ^ a, key);
+                counters[a][b]++;
+            }
+        }
+
+        return max(counters);
+    }
+
+    private static int max(int[][] values) {
+        return Arrays.stream(values)
+                .mapToInt(Main::max)
+                .max()
+                .orElseThrow(() -> new IllegalArgumentException("array is empty"));
+    }
+
+    private static int max(int[] values) {
+        return Arrays.stream(values)
+                .max()
+                .orElseThrow(() -> new IllegalArgumentException("array is empty"));
+    }
+
+    private static int randomBlock() {
+        return rand.nextInt() & BLOCK_MASK;
     }
 
     private static void dump(byte[] bytes) {

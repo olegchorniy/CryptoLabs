@@ -14,18 +14,28 @@ public class HeysCipher {
         this.sBox = S_BOXES[sBoxNumber - 1];
     }
 
-    public short encrypt(short block, short[] key) {
-        int cipherText = block;
-
-        for (int i = 0; i < ROUNDS; i++) {
-            cipherText = mixKey(cipherText, key[i]);
-            cipherText = substitute(cipherText);
-            cipherText = permute(cipherText);
-        }
+    public int encrypt(int block, int[] key) {
+        int cipherText = partialEncrypt(block, key, ROUNDS);
 
         cipherText = mixKey(cipherText, key[ROUNDS]);
 
-        return (short) cipherText;
+        return cipherText;
+    }
+
+    public int partialEncrypt(int block, int[] key, int rounds) {
+        int cipherText = block;
+
+        for (int i = 0; i < rounds; i++) {
+            cipherText = round(cipherText, key[i]);
+        }
+
+        return cipherText;
+    }
+
+    public int round(int block, int key) {
+        int cipherText = mixKey(block, key);
+        cipherText = substitute(cipherText);
+        return permute(cipherText);
     }
 
     /* ----------------- Round operations -----------------*/
