@@ -2,6 +2,9 @@ package ipt.lab.crypt.lab1;
 
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -15,34 +18,72 @@ public class Main {
 
     public static final Random rand = new Random();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         HeysCipher heys = new HeysCipher(1);
 
-        int key = randomBlock();
+        long before = System.currentTimeMillis();
+        DiffProb[][] probsTable = differentialProbabilities(heys);
+        long time = System.currentTimeMillis() - before;
 
-        System.out.println(key);
-        System.out.println(maxProb(key));
+        for (DiffProb[] probs : probsTable) {
+            if (probs == null) {
+                continue;
+            }
+            System.out.println(Arrays.stream(probs).mapToDouble(p -> p.prob).max());
+        }
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("D:/probs.bin"))) {
+            oos.writeObject(probsTable);
+        }
+
+        System.out.println(time);
     }
 
-    private static int maxProb(int key) {
-        HeysCipher heys = new HeysCipher(1);
-        int max = 0;
+    private static DiffProb[][] differentialProbabilities(HeysCipher heys) {
+        int[] SP = precomputeSP(heys);
+        DiffProb[][] probabilities = new DiffProb[BLOCKS_NUMBER][];
 
         for (int a = 1; a < BLOCKS_NUMBER; a++) {
             int[] counters = new int[BLOCKS_NUMBER];
+
             for (int block = 0; block < BLOCKS_NUMBER; block++) {
-
-                int b = heys.round(block, key) ^ heys.round(block ^ a, key);
-                counters[b]++;
+                counters[SP[block] ^ SP[block ^ a]]++;
             }
 
-            int localMax = max(counters);
-            if (localMax > max) {
-                max = localMax;
+            //count diffs with non-zero probability
+            int possibleDiffsNumber = 0;
+            for (int counter : counters) {
+                if (counter != 0) {
+                    possibleDiffsNumber++;
+                }
             }
+
+            //retain pairs with non-zero probability
+            int currentIndex = 0;
+            DiffProb[] derivedBlocks = new DiffProb[possibleDiffsNumber];
+
+            for (int b = 0; b < BLOCKS_NUMBER; b++) {
+                if (counters[b] != 0) {
+                    derivedBlocks[currentIndex++] = new DiffProb(b, counters[b] / ((double) BLOCKS_NUMBER));
+                }
+            }
+
+            System.out.println(a + " = " + derivedBlocks.length);
+
+            probabilities[a] = derivedBlocks;
         }
 
-        return max;
+        return probabilities;
+    }
+
+    private static int[] precomputeSP(HeysCipher heysCipher) {
+        int[] SP = new int[BLOCKS_NUMBER];
+
+        for (int block = 0; block < BLOCKS_NUMBER; block++) {
+            SP[block] = heysCipher.SP(block);
+        }
+
+        return SP;
     }
 
     private static int max(int[][] values) {

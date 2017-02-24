@@ -33,9 +33,11 @@ public class HeysCipher {
     }
 
     public int round(int block, int key) {
-        int cipherText = mixKey(block, key);
-        cipherText = substitute(cipherText);
-        return permute(cipherText);
+        return SP(mixKey(block, key));
+    }
+
+    public int SP(int block) {
+        return permute(substitute(block));
     }
 
     /* ----------------- Round operations -----------------*/
@@ -45,10 +47,13 @@ public class HeysCipher {
     }
 
     private int substitute(int block) {
-        return sBox[block & 0xF] |
-                (sBox[(block >> 4) & 0xF] << 4) |
-                (sBox[(block >> 8) & 0xF] << 8) |
-                (sBox[(block >> 12) & 0xF] << 12);
+        int result = sBox[block & 0xF];
+
+        result |= sBox[(block >> 4) & 0xF] << 4;
+        result |= sBox[(block >> 8) & 0xF] << 8;
+        result |= sBox[(block >> 12) & 0xF] << 12;
+
+        return result;
     }
 
     private static int permute(int block) {
