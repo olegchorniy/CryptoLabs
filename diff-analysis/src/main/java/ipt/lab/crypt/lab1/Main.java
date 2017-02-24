@@ -1,16 +1,22 @@
 package ipt.lab.crypt.lab1;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Random;
 
 import static java.lang.Integer.toHexString;
 
 public class Main {
+
+    private static final String file = "D:/probs.bin";
 
     public static final int BLOCKS_SIZE = 16;
     public static final int BLOCKS_NUMBER = 1 << BLOCKS_SIZE; //0x10000
@@ -19,24 +25,33 @@ public class Main {
     public static final Random rand = new Random();
 
     public static void main(String[] args) throws IOException {
-        HeysCipher heys = new HeysCipher(1);
+        DiffProb[][] probsTable = deserialize();
 
-        long before = System.currentTimeMillis();
-        DiffProb[][] probsTable = differentialProbabilities(heys);
-        long time = System.currentTimeMillis() - before;
-
-        for (DiffProb[] probs : probsTable) {
-            if (probs == null) {
-                continue;
-            }
-            System.out.println(Arrays.stream(probs).mapToDouble(p -> p.prob).max());
+        int totalSize = 0;
+        for (DiffProb[] diffProbs : probsTable) {
+            if (diffProbs != null)
+                totalSize += diffProbs.length;
         }
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("D:/probs.bin"))) {
-            oos.writeObject(probsTable);
-        }
+        System.out.println(totalSize);
+    }
 
-        System.out.println(time);
+    private static void serialize(DiffProb[][] probsTable) throws IOException {
+        Kryo kryo = new Kryo();
+
+        try (OutputStream out = new FileOutputStream(file);
+             Output output = new Output(out, 4096)) {
+            kryo.writeObject(output, probsTable);
+        }
+    }
+
+    private static DiffProb[][] deserialize() throws IOException {
+        Kryo kryo = new Kryo();
+
+        try (FileInputStream fis = new FileInputStream(file);
+             Input input = new Input(fis, 4096)) {
+            return kryo.readObject(input, DiffProb[][].class);
+        }
     }
 
     private static DiffProb[][] differentialProbabilities(HeysCipher heys) {
@@ -68,7 +83,7 @@ public class Main {
                 }
             }
 
-            System.out.println(a + " = " + derivedBlocks.length);
+            //System.out.println(a + " = " + derivedBlocks.length);
 
             probabilities[a] = derivedBlocks;
         }
