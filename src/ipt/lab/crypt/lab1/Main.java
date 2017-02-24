@@ -26,17 +26,23 @@ public class Main {
 
     private static int maxProb(int key) {
         HeysCipher heys = new HeysCipher(1);
-        int[][] counters = new int[BLOCKS_NUMBER][BLOCKS_NUMBER];
+        int max = 0;
 
-        for (int a = 0; a < BLOCKS_NUMBER; a++) {
+        for (int a = 1; a < BLOCKS_NUMBER; a++) {
+            int[] counters = new int[BLOCKS_NUMBER];
             for (int block = 0; block < BLOCKS_NUMBER; block++) {
 
                 int b = heys.round(block, key) ^ heys.round(block ^ a, key);
-                counters[a][b]++;
+                counters[b]++;
+            }
+
+            int localMax = max(counters);
+            if (localMax > max) {
+                max = localMax;
             }
         }
 
-        return max(counters);
+        return max;
     }
 
     private static int max(int[][] values) {
