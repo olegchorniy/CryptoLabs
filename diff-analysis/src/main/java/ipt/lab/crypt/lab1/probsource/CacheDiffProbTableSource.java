@@ -1,6 +1,6 @@
 package ipt.lab.crypt.lab1.probsource;
 
-import ipt.lab.crypt.lab1.SerializationUtil;
+import ipt.lab.crypt.lab1.utils.SerializationUtil;
 import ipt.lab.crypt.lab1.cache.CachingServer;
 import org.apache.commons.lang3.time.StopWatch;
 

@@ -9,13 +9,17 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 
+/**
+ * Poor attempt to cache table of differential probabilities in the memory and to retrieve it via sockets.
+ * It works even worse than fetching table directly from the disk (~5-6 seconds against ~2-3 seconds)
+ */
 public class CachingServer {
 
     public static final int PORT = 7777;
 
     public static void main(String[] args) throws IOException {
 
-        byte[] serializedDiffTable = Files.readAllBytes(FileDiffPropTableSource.probsFile);
+        byte[] serializedDiffTable = Files.readAllBytes(FileDiffPropTableSource.resolveFile(1));
 
         System.out.println("Array loaded, size = " + serializedDiffTable.length);
 

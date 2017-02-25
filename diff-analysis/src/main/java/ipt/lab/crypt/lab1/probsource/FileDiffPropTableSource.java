@@ -1,37 +1,33 @@
 package ipt.lab.crypt.lab1.probsource;
 
 import ipt.lab.crypt.lab1.Constants;
-import ipt.lab.crypt.lab1.SerializationUtil;
+import ipt.lab.crypt.lab1.utils.SerializationUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class FileDiffPropTableSource implements DiffProbTableSource {
 
-    public static final Path probsFile = Constants.BASE_DIR.resolve("probs.bin");
+    public static final Path probsDir = Constants.BASE_DIR.resolve("prob_tables");
 
     @Override
     public long[][] getDiffProbTable(int sBoxNumber) {
         try {
-            return deserialize();
+            return SerializationUtil.deserialize(resolveFile(sBoxNumber), long[][].class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void updateTable(long[][] newTable) {
+    public void updateTable(long[][] newTable, int sBoxNumber) {
         try {
-            serialize(newTable);
+            SerializationUtil.serialize(resolveFile(sBoxNumber), newTable);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void serialize(long[][] probsTable) throws IOException {
-        SerializationUtil.serialize(probsFile, probsTable);
-    }
-
-    private static long[][] deserialize() throws IOException {
-        return SerializationUtil.deserialize(probsFile, long[][].class);
+    public static Path resolveFile(int sBoxNumber) {
+        return probsDir.resolve(sBoxNumber + ".bin");
     }
 }

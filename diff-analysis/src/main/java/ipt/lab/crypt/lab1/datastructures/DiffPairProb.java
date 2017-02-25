@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1;
+package ipt.lab.crypt.lab1.datastructures;
 
 import ipt.lab.crypt.lab1.utils.PrintUtils;
 

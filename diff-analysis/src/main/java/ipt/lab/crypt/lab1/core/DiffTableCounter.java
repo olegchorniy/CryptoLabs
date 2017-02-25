@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1;
+package ipt.lab.crypt.lab1.core;
 
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 

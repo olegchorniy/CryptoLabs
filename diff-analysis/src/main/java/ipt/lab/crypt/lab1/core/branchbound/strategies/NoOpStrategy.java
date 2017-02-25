@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.branchbound.strategies;
+package ipt.lab.crypt.lab1.core.branchbound.strategies;
 
 public class NoOpStrategy implements BoundStrategy {
 

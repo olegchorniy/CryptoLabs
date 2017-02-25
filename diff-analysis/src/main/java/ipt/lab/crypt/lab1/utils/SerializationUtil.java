@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1;
+package ipt.lab.crypt.lab1.utils;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

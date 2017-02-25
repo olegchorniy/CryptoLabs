@@ -1,8 +1,8 @@
-package ipt.lab.crypt.lab1.branchbound;
+package ipt.lab.crypt.lab1.core.branchbound;
 
-import ipt.lab.crypt.lab1.DiffTableCounter;
-import ipt.lab.crypt.lab1.branchbound.strategies.BoundStrategy;
-import ipt.lab.crypt.lab1.branchbound.strategies.NoOpStrategy;
+import ipt.lab.crypt.lab1.core.DiffTableCounter;
+import ipt.lab.crypt.lab1.core.branchbound.strategies.BoundStrategy;
+import ipt.lab.crypt.lab1.core.branchbound.strategies.NoOpStrategy;
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 
 import java.util.Arrays;
