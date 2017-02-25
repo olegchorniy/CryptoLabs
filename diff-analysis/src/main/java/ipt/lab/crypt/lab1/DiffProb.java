@@ -30,4 +30,9 @@ public class DiffProb implements Serializable {
     public void setProb(double prob) {
         this.prob = prob;
     }
+
+    @Override
+    public String toString() {
+        return Integer.toHexString(block) + " -> " + prob;
+    }
 }

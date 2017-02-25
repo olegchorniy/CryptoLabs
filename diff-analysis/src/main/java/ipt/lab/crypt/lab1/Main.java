@@ -4,101 +4,93 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import ipt.lab.crypt.lab1.heys.HeysCipher;
+import ipt.lab.crypt.lab1.heys.HeysConsoleUtility;
+import org.apache.commons.lang3.time.StopWatch;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
-import static java.lang.Integer.toHexString;
+import static ipt.lab.crypt.lab1.Constants.*;
 
 public class Main {
 
-    private static final String file = "D:/probs.bin";
-
-    public static final int BLOCKS_SIZE = 16;
-    public static final int BLOCKS_NUMBER = 1 << BLOCKS_SIZE; //0x10000
-    public static final int BLOCK_MASK = BLOCKS_NUMBER - 1; //0xFFFF
+    private static final Path probsFile = Constants.BASE_DIR.resolve("probs.bin");
 
     public static final Random rand = new Random();
 
     public static void main(String[] args) throws IOException {
-        DiffProb[][] probsTable = deserialize();
 
-        int totalSize = 0;
-        for (DiffProb[] diffProbs : probsTable) {
-            if (diffProbs != null)
-                totalSize += diffProbs.length;
+        int testBlock = 0x1234;
+
+        int key[] = new int[7];
+        for (int i = 0; i < key.length; i++) {
+            key[i] = randomBlock();
         }
 
-        System.out.println(totalSize);
+        HeysCipher heys = new HeysCipher(1);
+        HeysConsoleUtility consoleHeys = new HeysConsoleUtility(1);
+
+        System.out.println(Integer.toHexString(consoleHeys.encrypt(testBlock, key)));
+        System.out.println(Integer.toHexString(heys.encrypt(testBlock, key)));
     }
 
-    private static void serialize(DiffProb[][] probsTable) throws IOException {
+    public static void read() throws IOException {
+        StopWatch sw = new StopWatch();
+
+        sw.start();
+        long[][] probsTable = deserialize();
+        sw.stop();
+
+        System.out.println("Deserialization: " + sw.getTime());
+
+        int totalSize = 0;
+        for (long[] probs : probsTable) {
+            totalSize += (probs == null ? 0 : probs.length);
+        }
+
+        System.out.println("totalSize = " + totalSize);
+    }
+
+    private static void evaluateAndSerialize() throws IOException {
+
+        StopWatch sw = new StopWatch();
+
+        sw.start();
+        long[][] probsTable = DiffTableCounter.differentialProbabilities(new HeysCipher(1));
+        sw.stop();
+
+        System.out.println("Count: " + sw.getTime());
+
+        sw.reset();
+
+        sw.start();
+        serialize(probsTable);
+        sw.stop();
+
+        System.out.println("Serialization: " + sw.getTime());
+    }
+
+    private static void serialize(long[][] probsTable) throws IOException {
         Kryo kryo = new Kryo();
 
-        try (OutputStream out = new FileOutputStream(file);
+        try (OutputStream out = Files.newOutputStream(probsFile);
              Output output = new Output(out, 4096)) {
             kryo.writeObject(output, probsTable);
         }
     }
 
-    private static DiffProb[][] deserialize() throws IOException {
+    private static long[][] deserialize() throws IOException {
         Kryo kryo = new Kryo();
 
-        try (FileInputStream fis = new FileInputStream(file);
+        try (InputStream fis = Files.newInputStream(probsFile);
              Input input = new Input(fis, 4096)) {
-            return kryo.readObject(input, DiffProb[][].class);
+            return kryo.readObject(input, long[][].class);
         }
-    }
-
-    private static DiffProb[][] differentialProbabilities(HeysCipher heys) {
-        int[] SP = precomputeSP(heys);
-        DiffProb[][] probabilities = new DiffProb[BLOCKS_NUMBER][];
-
-        for (int a = 1; a < BLOCKS_NUMBER; a++) {
-            int[] counters = new int[BLOCKS_NUMBER];
-
-            for (int block = 0; block < BLOCKS_NUMBER; block++) {
-                counters[SP[block] ^ SP[block ^ a]]++;
-            }
-
-            //count diffs with non-zero probability
-            int possibleDiffsNumber = 0;
-            for (int counter : counters) {
-                if (counter != 0) {
-                    possibleDiffsNumber++;
-                }
-            }
-
-            //retain pairs with non-zero probability
-            int currentIndex = 0;
-            DiffProb[] derivedBlocks = new DiffProb[possibleDiffsNumber];
-
-            for (int b = 0; b < BLOCKS_NUMBER; b++) {
-                if (counters[b] != 0) {
-                    derivedBlocks[currentIndex++] = new DiffProb(b, counters[b] / ((double) BLOCKS_NUMBER));
-                }
-            }
-
-            //System.out.println(a + " = " + derivedBlocks.length);
-
-            probabilities[a] = derivedBlocks;
-        }
-
-        return probabilities;
-    }
-
-    private static int[] precomputeSP(HeysCipher heysCipher) {
-        int[] SP = new int[BLOCKS_NUMBER];
-
-        for (int block = 0; block < BLOCKS_NUMBER; block++) {
-            SP[block] = heysCipher.SP(block);
-        }
-
-        return SP;
     }
 
     private static int max(int[][] values) {
@@ -116,20 +108,5 @@ public class Main {
 
     private static int randomBlock() {
         return rand.nextInt() & BLOCK_MASK;
-    }
-
-    private static void dump(byte[] bytes) {
-        for (byte value : bytes) {
-            System.out.print(padHex(toHexString(value & 0xFF).toUpperCase()));
-            System.out.print(" ");
-        }
-        System.out.println();
-    }
-
-    private static String padHex(String hex) {
-        if (hex.length() == 2) {
-            return hex;
-        }
-        return "0" + hex;
     }
 }
