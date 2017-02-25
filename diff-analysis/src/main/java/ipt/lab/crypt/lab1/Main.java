@@ -1,109 +1,91 @@
 package ipt.lab.crypt.lab1;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import ipt.lab.crypt.lab1.heys.HeysCipher;
-import ipt.lab.crypt.lab1.heys.HeysConsoleUtility;
+import ipt.lab.crypt.lab1.branchbound.BranchAndBound;
+import ipt.lab.crypt.lab1.branchbound.strategies.ProbabilityThresholdStrategy;
+import ipt.lab.crypt.lab1.probsource.DiffProbTableSource;
+import ipt.lab.crypt.lab1.probsource.FileDiffPropTableSource;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
-import static ipt.lab.crypt.lab1.Constants.*;
+import static ipt.lab.crypt.lab1.Constants.BLOCKS_NUMBER;
+import static ipt.lab.crypt.lab1.Constants.BLOCK_MASK;
 
 public class Main {
 
-    private static final Path probsFile = Constants.BASE_DIR.resolve("probs.bin");
+    private static final Comparator<DiffProb> descByProbComparator = (lv, rv) -> Double.compare(rv.getProb(), lv.getProb());
 
     public static final Random rand = new Random();
 
     public static void main(String[] args) throws IOException {
+        DiffProbTableSource source = new FileDiffPropTableSource();
+        long[][] roundDiffProbs = source.getDiffProbTable(1);
 
-        int testBlock = 0x1234;
+        System.out.println("Deserialized");
 
-        int key[] = new int[7];
-        for (int i = 0; i < key.length; i++) {
-            key[i] = randomBlock();
-        }
-
-        HeysCipher heys = new HeysCipher(1);
-        HeysConsoleUtility consoleHeys = new HeysConsoleUtility(1);
-
-        System.out.println(Integer.toHexString(consoleHeys.encrypt(testBlock, key)));
-        System.out.println(Integer.toHexString(heys.encrypt(testBlock, key)));
-    }
-
-    public static void read() throws IOException {
-        StopWatch sw = new StopWatch();
-
-        sw.start();
-        long[][] probsTable = deserialize();
-        sw.stop();
-
-        System.out.println("Deserialization: " + sw.getTime());
-
-        int totalSize = 0;
-        for (long[] probs : probsTable) {
-            totalSize += (probs == null ? 0 : probs.length);
-        }
-
-        System.out.println("totalSize = " + totalSize);
-    }
-
-    private static void evaluateAndSerialize() throws IOException {
+        BranchAndBound bab = new BranchAndBound(roundDiffProbs, new ProbabilityThresholdStrategy(4.0 / (65535.0)));
+        DiffProb globalMax = null;
 
         StopWatch sw = new StopWatch();
 
-        sw.start();
-        long[][] probsTable = DiffTableCounter.differentialProbabilities(new HeysCipher(1));
-        sw.stop();
+        for (int i = 1; i <= 10_000; i++) {
+            int diff = i;//randomBlock();
 
-        System.out.println("Count: " + sw.getTime());
+            sw.start();
+            double[] diffProbs = bab.differentialSearch(diff);
+            sw.stop();
 
-        sw.reset();
+            DiffProb max = findMax(diffProbs);
 
-        sw.start();
-        serialize(probsTable);
-        sw.stop();
+            if (globalMax == null || max.getProb() > globalMax.getProb()) {
+                globalMax = max;
+            }
 
-        System.out.println("Serialization: " + sw.getTime());
-    }
+            if (i % 100 == 0)
+                System.out.printf("i = %d, a = %s, b = %s, p = %.7f, globalMax = (%s, %.7f), time = %d%n",
+                        i,
+                        PrintUtils.toHexAsShort(diff),
+                        PrintUtils.toHexAsShort(max.getDiff()),
+                        max.getProb(),
+                        PrintUtils.toHexAsShort(globalMax.getDiff()),
+                        globalMax.getProb(),
+                        sw.getTime()
+                );
 
-    private static void serialize(long[][] probsTable) throws IOException {
-        Kryo kryo = new Kryo();
-
-        try (OutputStream out = Files.newOutputStream(probsFile);
-             Output output = new Output(out, 4096)) {
-            kryo.writeObject(output, probsTable);
+            sw.reset();
         }
     }
 
-    private static long[][] deserialize() throws IOException {
-        Kryo kryo = new Kryo();
+    private static DiffProb findMax(double[] diffProbs) {
+        int maxDiff = 1;
+        double maxProb = diffProbs[1];
 
-        try (InputStream fis = Files.newInputStream(probsFile);
-             Input input = new Input(fis, 4096)) {
-            return kryo.readObject(input, long[][].class);
+        for (int diff = 2; diff < BLOCKS_NUMBER; diff++) {
+            if (diffProbs[diff] > maxProb) {
+                maxProb = diffProbs[diff];
+                maxDiff = diff;
+            }
         }
+
+        return new DiffProb(maxDiff, maxProb);
     }
 
-    private static int max(int[][] values) {
-        return Arrays.stream(values)
-                .mapToInt(Main::max)
-                .max()
-                .orElseThrow(() -> new IllegalArgumentException("array is empty"));
-    }
+    private static List<DiffProb> toSortedList(double[] diffProbs) {
+        List<DiffProb> probsList = new ArrayList<>(diffProbs.length);
 
-    private static int max(int[] values) {
-        return Arrays.stream(values)
-                .max()
-                .orElseThrow(() -> new IllegalArgumentException("array is empty"));
+        for (int diff = 0; diff < diffProbs.length; diff++) {
+            if (diffProbs[diff] > 0) {
+                probsList.add(new DiffProb(diff, diffProbs[diff]));
+            }
+        }
+
+        probsList.sort(descByProbComparator);
+
+        return probsList;
     }
 
     private static int randomBlock() {

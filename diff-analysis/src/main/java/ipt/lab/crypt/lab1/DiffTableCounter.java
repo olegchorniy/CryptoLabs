@@ -40,8 +40,6 @@ public class DiffTableCounter {
                 }
             }
 
-            //System.out.println(a + " = " + derivedBlocks.length);
-
             probabilities[a] = derivedBlocks;
         }
 

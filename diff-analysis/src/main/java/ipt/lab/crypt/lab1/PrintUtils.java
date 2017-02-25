@@ -8,8 +8,12 @@ public abstract class PrintUtils {
     private PrintUtils() {
     }
 
+    public static String toHexAsShort(int value) {
+        return padHex(Integer.toHexString(value & 0xFFFF), 4);
+    }
+
     public static String toHexAsByte(int value) {
-        return padHex(Integer.toHexString(value & Constants.BLOCK_MASK));
+        return padHex(Integer.toHexString(value & Constants.BLOCK_MASK), 2);
     }
 
     public static String toHexAsByte(int[] bytes) {
@@ -18,10 +22,11 @@ public abstract class PrintUtils {
                 .collect(Collectors.joining(" "));
     }
 
-    private static String padHex(String hex) {
-        if (hex.length() == 2) {
-            return hex;
+    private static String padHex(String hex, int length) {
+        while (hex.length() < length) {
+            hex = "0" + hex;
         }
-        return "0" + hex;
+
+        return hex;
     }
 }

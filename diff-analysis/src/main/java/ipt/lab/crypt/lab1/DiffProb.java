@@ -4,23 +4,23 @@ import java.io.Serializable;
 
 public class DiffProb implements Serializable {
 
-    private int block;
+    private int diff;
     private double prob;
 
     public DiffProb() {
     }
 
-    public DiffProb(int block, double prob) {
-        this.block = block;
+    public DiffProb(int diff, double prob) {
+        this.diff = diff;
         this.prob = prob;
     }
 
-    public int getBlock() {
-        return block;
+    public int getDiff() {
+        return diff;
     }
 
-    public void setBlock(int block) {
-        this.block = block;
+    public void setDiff(int diff) {
+        this.diff = diff;
     }
 
     public double getProb() {
@@ -33,6 +33,6 @@ public class DiffProb implements Serializable {
 
     @Override
     public String toString() {
-        return Integer.toHexString(block) + " -> " + prob;
+        return String.format("%s -> %.6f", PrintUtils.toHexAsShort(diff), prob);
     }
 }
