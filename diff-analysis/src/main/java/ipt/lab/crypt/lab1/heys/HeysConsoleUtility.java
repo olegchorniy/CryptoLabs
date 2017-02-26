@@ -25,22 +25,23 @@ public class HeysConsoleUtility {
         this.sBoxNumber = sBoxNumber;
     }
 
-    public int encrypt(int block) {
-        return encrypt(block, null);
+    public int[] encrypt(int[] blocks) {
+        return encrypt(blocks, null);
     }
 
-    public int encrypt(int block, int[] key) {
+    public int[] encrypt(int[] blocks, int[] key) {
         try {
             //temp files for intercommunication with external process
             Path plainTextFile = tempFile();
             Path cipherTextFile = tempFile();
             Path keyFile = writeKeyToFileIfNotNull(key);
-            int result;
 
-            //1. write block and key to temporary files
+            //1. write blocks and key to temporary files
 
             try (OutputStream out = Files.newOutputStream(plainTextFile)) {
-                write2BytesLE(out, block);
+                for (int block : blocks) {
+                    write2BytesLE(out, block);
+                }
             }
 
             //2. issue an encryption command, wait until encryption completes
@@ -60,8 +61,12 @@ public class HeysConsoleUtility {
             encryptionProcess.waitFor();
 
             //3. read encrypted block from the file
+            int[] result = new int[blocks.length];
+
             try (InputStream in = Files.newInputStream(cipherTextFile)) {
-                result = readBytesLE(in);
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = readBytesLE(in);
+                }
             }
 
             //4. delete temp files

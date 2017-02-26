@@ -95,16 +95,6 @@ public class HeysCipher {
     }
 
     public static int inversePermute(int block) {
-        int result = block & 0x8421;
-
-        result |= (block & 0x0842) >> 3;
-        result |= (block & 0x0084) >> 6;
-        result |= (block & 0x0008) >> 9;
-
-        result |= (block & 0x4210) << 3;
-        result |= (block & 0x2100) << 6;
-        result |= (block & 0x1000) << 9;
-
-        return result;
+        return permute(block);
     }
 }

@@ -1,8 +1,8 @@
 package ipt.lab.crypt.lab1.core;
 
-import ipt.lab.crypt.lab1.DiffPairProb;
-import ipt.lab.crypt.lab1.DiffProb;
 import ipt.lab.crypt.lab1.core.branchbound.BranchAndBound;
+import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
+import ipt.lab.crypt.lab1.datastructures.DiffProb;
 import ipt.lab.crypt.lab1.probsource.DiffProbTableSource;
 import ipt.lab.crypt.lab1.probsource.FileDiffPropTableSource;
 import ipt.lab.crypt.lab1.utils.PrintUtils;
