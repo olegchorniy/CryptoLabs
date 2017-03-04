@@ -6,13 +6,11 @@ import ipt.lab.crypt.lab1.core.branchbound.strategies.NoOpStrategy;
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import static ipt.lab.crypt.lab1.Constants.BLOCKS_NUMBER;
 
 public class BranchAndBound {
 
-    private static final Logger LOGGER = Logger.getLogger(BranchAndBound.class.getName());
     private static final double blocksNumber = (double) BLOCKS_NUMBER;
 
     private final long[][] roundDiffProbs;
@@ -28,8 +26,6 @@ public class BranchAndBound {
     }
 
     public double[] differentialSearch(int a) {
-        //LOGGER.info("differentialSearch started");
-
         //indices of this array serve as differentials
         double[] currentDiffProbs = emptyProbsArray();
 
@@ -62,7 +58,6 @@ public class BranchAndBound {
             boundStrategy.sieve(nextDiffProbs);
 
             currentDiffProbs = nextDiffProbs;
-            //LOGGER.info(round + " round completed, max value = " + Arrays.stream(currentDiffProbs).max());
         }
 
         return currentDiffProbs;

@@ -3,6 +3,7 @@ package ipt.lab.crypt.lab1.datastructures;
 import ipt.lab.crypt.lab1.utils.PrintUtils;
 
 import java.io.Serializable;
+import java.util.Formatter;
 
 public class DiffProb implements Serializable {
 
@@ -35,6 +36,8 @@ public class DiffProb implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("%s = %.6f", PrintUtils.toHexAsShort(diff), prob);
+        return new Formatter(new StringBuilder(20))
+                .format("%s, p = %.8f", PrintUtils.toHexAsShort(diff), prob)
+                .toString();
     }
 }

@@ -1,6 +1,9 @@
 package ipt.lab.crypt.lab1.core;
 
+import ipt.lab.crypt.lab1.Constants;
+import ipt.lab.crypt.lab1.core.blockgeneration.BlocksDistributor;
 import ipt.lab.crypt.lab1.core.branchbound.BranchAndBound;
+import ipt.lab.crypt.lab1.core.branchbound.strategies.ProbabilityThresholdStrategy;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
 import ipt.lab.crypt.lab1.datastructures.DiffProb;
 import ipt.lab.crypt.lab1.probsource.DiffProbTableSource;
@@ -10,10 +13,8 @@ import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static ipt.lab.crypt.lab1.Constants.BLOCKS_NUMBER;
-import static ipt.lab.crypt.lab1.Constants.BLOCK_MASK;
 
 public class FiveRoundDifferentialsFinder {
 
@@ -23,20 +24,30 @@ public class FiveRoundDifferentialsFinder {
 
     public static void main(String[] args) throws IOException {
         DiffProbTableSource source = new FileDiffPropTableSource();
-        long[][] roundDiffProbs = source.getDiffProbTable(11);
+        long[][] roundDiffProbs = source.getDiffProbTable(Constants.VARIANT);
 
         System.out.println("Deserialized");
 
-        BranchAndBound bab = new BranchAndBound(roundDiffProbs/*, new ProbabilityThresholdStrategy(4.0 / (65535.0)));*/);
+        BranchAndBound bab = new BranchAndBound(roundDiffProbs/*, new ProbabilityThresholdStrategy(1.0 / (65535.0))*/);
+        BlocksDistributor blocks = new BlocksDistributor(2);
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 1; i++) {
             new Thread(() -> {
-                DiffPairProb globalMax = null;
+                DiffPairProb threadMax = null;
 
                 StopWatch sw = new StopWatch();
 
-                for (int iteration = 1; iteration <= 10_000; iteration++) {
-                    int diff = (iteration % 2 == 0) ? randomBlock() : randomSparseBlock();
+                int iteration = 0;
+                while (true) {
+                    iteration++;
+
+                    Optional<Integer> diffHolder = blocks.getIfAvailable();
+
+                    if (!diffHolder.isPresent()) {
+                        break;
+                    }
+
+                    int diff = diffHolder.get();
 
                     sw.start();
                     double[] diffProbs = bab.differentialSearch(diff);
@@ -44,22 +55,24 @@ public class FiveRoundDifferentialsFinder {
 
                     DiffProb max = findMax(diffProbs);
 
-                    if (globalMax == null || max.getProb() > globalMax.getProb()) {
-                        globalMax = new DiffPairProb(diff, max.getDiff(), max.getProb());
+                    if (threadMax == null || max.getProb() > threadMax.getProb()) {
+                        threadMax = new DiffPairProb(diff, max.getDiff(), max.getProb());
                     }
 
 
-                    StringBuilder builder = new StringBuilder(100);
-                    new Formatter(builder).format("[Thread = %s] i = %d, a = %s, b = %s, p = %.7f, globalMax = (%s), time = %d%n",
-                            Thread.currentThread().getName(),
-                            iteration,
-                            PrintUtils.toHexAsShort(diff),
-                            PrintUtils.toHexAsShort(max.getDiff()),
-                            max.getProb(),
-                            globalMax,
-                            sw.getTime());
+                    String result = new Formatter(new StringBuilder(100))
+                            .format(
+                                    "[Thread = %s] i = %d, a = %s, b = %s, p = %.8f, threadMax = (%s), time = %d",
+                                    Thread.currentThread().getName(),
+                                    iteration,
+                                    PrintUtils.toHexAsShort(diff),
+                                    PrintUtils.toHexAsShort(max.getDiff()),
+                                    max.getProb(),
+                                    threadMax,
+                                    sw.getTime()
+                            ).toString();
 
-                    System.out.println(builder.toString());
+                    System.out.println(result);
 
                     sw.reset();
                 }
@@ -93,24 +106,5 @@ public class FiveRoundDifferentialsFinder {
         probsList.sort(descByProbComparator);
 
         return probsList;
-    }
-
-    private static int randomBlock() {
-        return ThreadLocalRandom.current().nextInt() & BLOCK_MASK;
-    }
-
-    private static int randomSparseBlock() {
-        int block;
-
-        do {
-            block = 0;
-            for (int i = 0; i < 4; i++) {
-                if (ThreadLocalRandom.current().nextBoolean()) {
-                    block |= (((ThreadLocalRandom.current().nextInt() >> 19) & 0xF) << (4 * i));
-                }
-            }
-        } while (block == 0);
-
-        return block;
     }
 }

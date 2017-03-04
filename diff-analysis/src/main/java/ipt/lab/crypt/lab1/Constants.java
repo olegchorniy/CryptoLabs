@@ -15,4 +15,5 @@ public abstract class Constants {
     public static final int BLOCK_MASK = BLOCKS_NUMBER - 1; //0xFFFF
 
     public static final boolean DEBUG_MODE = false;
+    public static final int VARIANT = 11;
 }

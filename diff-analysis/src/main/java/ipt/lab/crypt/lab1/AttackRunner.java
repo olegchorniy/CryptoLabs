@@ -4,7 +4,7 @@ import ipt.lab.crypt.lab1.core.HeysAttacker;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
 import ipt.lab.crypt.lab1.utils.PrintUtils;
 
-public class Main {
+public class AttackRunner {
 
     public static void main(String[] args) {
         HeysAttacker attacker = new HeysAttacker();

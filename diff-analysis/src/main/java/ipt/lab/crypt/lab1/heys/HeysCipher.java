@@ -1,5 +1,7 @@
 package ipt.lab.crypt.lab1.heys;
 
+import java.util.Arrays;
+
 public class HeysCipher {
 
     public static final int ROUNDS = 6;
@@ -28,6 +30,10 @@ public class HeysCipher {
         for (int i = 0; i < this.inverseSBox.length; i++) {
             this.inverseSBox[this.sBox[i]] = i;
         }
+    }
+
+    public int[] getSBox() {
+        return Arrays.copyOf(sBox, sBox.length);
     }
 
     public int encrypt(int block, int[] key) {

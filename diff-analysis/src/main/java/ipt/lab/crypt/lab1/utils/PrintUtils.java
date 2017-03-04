@@ -1,7 +1,5 @@
 package ipt.lab.crypt.lab1.utils;
 
-import ipt.lab.crypt.lab1.Constants;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -10,12 +8,16 @@ public abstract class PrintUtils {
     private PrintUtils() {
     }
 
-    public static String toHexAsShort(int value) {
-        return padHex(Integer.toHexString(value & 0xFFFF), 4);
+    public static String toHexAsSubBlock(int value) {
+        return Integer.toHexString(value & 0xF);
     }
 
     public static String toHexAsByte(int value) {
-        return padHex(Integer.toHexString(value & Constants.BLOCK_MASK), 2);
+        return padHex(Integer.toHexString(value & 0xFF), 2);
+    }
+
+    public static String toHexAsShort(int value) {
+        return padHex(Integer.toHexString(value & 0xFFFF), 4);
     }
 
     public static String toHexAsByte(int[] bytes) {
