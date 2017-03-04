@@ -3,7 +3,6 @@ package ipt.lab.crypt.lab1.core;
 import ipt.lab.crypt.lab1.Constants;
 import ipt.lab.crypt.lab1.core.blockgeneration.BlocksDistributor;
 import ipt.lab.crypt.lab1.core.branchbound.BranchAndBound;
-import ipt.lab.crypt.lab1.core.branchbound.strategies.ProbabilityThresholdStrategy;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
 import ipt.lab.crypt.lab1.datastructures.DiffProb;
 import ipt.lab.crypt.lab1.probsource.DiffProbTableSource;
