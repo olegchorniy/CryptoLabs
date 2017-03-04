@@ -3,6 +3,7 @@ package ipt.lab.crypt.lab1.core;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
 import ipt.lab.crypt.lab1.heys.HeysCipher;
 import ipt.lab.crypt.lab1.heys.HeysConsoleUtility;
+import ipt.lab.crypt.lab1.utils.PrintUtils;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -21,7 +22,7 @@ public class HeysAttacker {
         int textNumberEstimate = (int) Math.floor(1.0 / (diffProb - 1.0 / BLOCKS_NUMBER));
         System.out.println("textNumberEstimate = " + textNumberEstimate);
 
-        textNumberEstimate = 4000;
+        textNumberEstimate = 3000;
 
         HeysConsoleUtility attackedHeys = new HeysConsoleUtility(sBoxNumber);
 
@@ -58,8 +59,12 @@ public class HeysAttacker {
                 keyCandidate = key;
             }
 
-            if (key % 1000 == 0) {
-                System.out.println(key + " done, candidateCoincides = " + candidateCoincides);
+            if (key % 500 == 0) {
+                System.out.format("%d done, candidate: %s, candidateCoincides: %d%n",
+                        key,
+                        PrintUtils.toHexAsShort(keyCandidate),
+                        candidateCoincides
+                );
             }
         }
 
