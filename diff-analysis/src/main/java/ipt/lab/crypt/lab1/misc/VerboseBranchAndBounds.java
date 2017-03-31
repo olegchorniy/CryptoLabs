@@ -1,9 +1,9 @@
 package ipt.lab.crypt.lab1.misc;
 
 import ipt.lab.crypt.lab1.Constants;
-import ipt.lab.crypt.lab1.core.branchbound.BranchAndBound;
-import ipt.lab.crypt.lab1.probsource.DiffProbTableSource;
-import ipt.lab.crypt.lab1.probsource.FileDiffPropTableSource;
+import ipt.lab.crypt.lab1.branchbound.BranchAndBound;
+import ipt.lab.crypt.lab1.difftable.probsource.DiffProbTableSource;
+import ipt.lab.crypt.lab1.difftable.probsource.FileDiffPropTableSource;
 
 public class VerboseBranchAndBounds {
 

@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.core.blockgeneration;
+package ipt.lab.crypt.lab1.diffsearcher.blockgeneration;
 
 import java.util.ArrayList;
 import java.util.List;

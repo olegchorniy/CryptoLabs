@@ -1,9 +1,9 @@
-package ipt.lab.crypt.lab1.core.blockgeneration;
+package ipt.lab.crypt.lab1.diffsearcher.blockgeneration;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
-public class TupleGenerator {
+class TupleGenerator {
 
     private final int max;
     private final int min;

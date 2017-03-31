@@ -1,13 +1,13 @@
-package ipt.lab.crypt.lab1.core;
+package ipt.lab.crypt.lab1.diffsearcher;
 
+import ipt.lab.crypt.common.utils.PrintUtils;
 import ipt.lab.crypt.lab1.Constants;
-import ipt.lab.crypt.lab1.core.blockgeneration.BlocksDistributor;
-import ipt.lab.crypt.lab1.core.branchbound.BranchAndBound;
+import ipt.lab.crypt.lab1.branchbound.BranchAndBound;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
 import ipt.lab.crypt.lab1.datastructures.DiffProb;
-import ipt.lab.crypt.lab1.probsource.DiffProbTableSource;
-import ipt.lab.crypt.lab1.probsource.FileDiffPropTableSource;
-import ipt.lab.crypt.lab1.utils.PrintUtils;
+import ipt.lab.crypt.lab1.diffsearcher.blockgeneration.BlocksDistributor;
+import ipt.lab.crypt.lab1.difftable.probsource.DiffProbTableSource;
+import ipt.lab.crypt.lab1.difftable.probsource.FileDiffPropTableSource;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.util.*;
 
 import static ipt.lab.crypt.lab1.Constants.BLOCKS_NUMBER;
 
-public class FiveRoundDifferentialsFinder {
+public class FiveRoundDifferentialsSearcher {
 
     private static final Comparator<DiffProb> descByProbComparator = (lv, rv) -> Double.compare(rv.getProb(), lv.getProb());
 

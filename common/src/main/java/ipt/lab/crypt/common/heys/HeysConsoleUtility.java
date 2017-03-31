@@ -1,28 +1,31 @@
-package ipt.lab.crypt.lab1.heys;
-
-import ipt.lab.crypt.lab1.Constants;
+package ipt.lab.crypt.common.heys;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
-import static ipt.lab.crypt.lab1.Constants.BASE_DIR;
-
 public class HeysConsoleUtility {
 
     private static final Logger LOGGER = Logger.getLogger(HeysConsoleUtility.class.getName());
 
-    private static final Path TEMP_FILES_LOCATION = BASE_DIR.resolve("tmp");
+    private static final String ENCRYPTION_COMMAND = "%s e%s %d %s %s %s";
     private static final String TEMP_FILE_PREFIX = "diff-crypt";
 
-    private static final Path HEYS_EXE_LOCATION = BASE_DIR.resolve("heys.exe");
-    private static final String ENCRYPTION_COMMAND = "%s e%s %d %s %s %s";
+    private final Path heysExeLocation;
+    private final Path tempFilesLocation;
 
     private final int sBoxNumber;
+    private boolean debugMode;
 
-    public HeysConsoleUtility(int sBoxNumber) {
+    public HeysConsoleUtility(Path baseDirectory, int sBoxNumber) {
         this.sBoxNumber = sBoxNumber;
+        this.heysExeLocation = baseDirectory.resolve("heys.exe");
+        this.tempFilesLocation = baseDirectory.resolve("tmp");
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     public int[] encrypt(int[] blocks) {
@@ -49,7 +52,7 @@ public class HeysConsoleUtility {
             String command = getEncryptionCommand(plainTextFile, cipherTextFile, keyFile);
             Process encryptionProcess = Runtime.getRuntime().exec(command);
 
-            if (Constants.DEBUG_MODE) {
+            if (debugMode) {
                 runReaderThread(new PrintWriter(System.err), encryptionProcess.getErrorStream());
                 runReaderThread(new PrintWriter(System.out), encryptionProcess.getInputStream());
             }
@@ -70,7 +73,7 @@ public class HeysConsoleUtility {
             }
 
             //4. delete temp files
-            if (!Constants.DEBUG_MODE) {
+            if (!debugMode) {
                 tryDelete(plainTextFile);
                 tryDelete(cipherTextFile);
             }
@@ -106,7 +109,7 @@ public class HeysConsoleUtility {
     }
 
     private Path tempFile() throws IOException {
-        return Files.createTempFile(TEMP_FILES_LOCATION, TEMP_FILE_PREFIX, null);
+        return Files.createTempFile(tempFilesLocation, TEMP_FILE_PREFIX, null);
     }
 
     private void tryDelete(Path file) {
@@ -120,8 +123,8 @@ public class HeysConsoleUtility {
     private String getEncryptionCommand(Path plainTextFile, Path cipherTextFile, Path keyFile) {
         return String.format(
                 ENCRYPTION_COMMAND,
-                HEYS_EXE_LOCATION,
-                (Constants.DEBUG_MODE ? "*" : ""),
+                heysExeLocation,
+                (debugMode ? "*" : ""),
                 sBoxNumber,
                 plainTextFile,
                 cipherTextFile,

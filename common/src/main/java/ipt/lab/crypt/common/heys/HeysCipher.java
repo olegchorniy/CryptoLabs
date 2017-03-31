@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.heys;
+package ipt.lab.crypt.common.heys;
 
 import java.util.Arrays;
 
@@ -12,7 +12,7 @@ public class HeysCipher {
             null,
             null,
             null,
-            null,
+            {0x2, 0x8, 0x9, 0x7, 0x5, 0xF, 0x0, 0xB, 0xC, 0x1, 0xD, 0xE, 0xA, 0x3, 0x6, 0x4}, /* 6 */
             null,
             null,
             null,

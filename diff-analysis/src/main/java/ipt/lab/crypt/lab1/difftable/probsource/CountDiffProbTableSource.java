@@ -1,7 +1,7 @@
-package ipt.lab.crypt.lab1.probsource;
+package ipt.lab.crypt.lab1.difftable.probsource;
 
-import ipt.lab.crypt.lab1.core.DiffTableCounter;
-import ipt.lab.crypt.lab1.heys.HeysCipher;
+import ipt.lab.crypt.lab1.difftable.DiffTableCounter;
+import ipt.lab.crypt.common.heys.HeysCipher;
 
 public class CountDiffProbTableSource implements DiffProbTableSource {
 

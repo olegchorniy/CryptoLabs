@@ -1,7 +1,7 @@
-package ipt.lab.crypt.lab1.probsource;
+package ipt.lab.crypt.lab1.difftable.probsource;
 
 import ipt.lab.crypt.lab1.Constants;
-import ipt.lab.crypt.lab1.utils.SerializationUtil;
+import ipt.lab.crypt.common.utils.SerializationUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;

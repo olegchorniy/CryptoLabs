@@ -1,8 +1,8 @@
-package ipt.lab.crypt.lab1.core.blockgeneration;
+package ipt.lab.crypt.lab1.diffsearcher.blockgeneration;
 
 import java.util.NoSuchElementException;
 
-public class BlockGenerator {
+class BlockGenerator {
 
     private static final int MAX_NON_ZERO_SUB_BLOCKS = 3;
     private static final int BIT_PER_SUB_BLOCK = 4;

@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.utils;
+package ipt.lab.crypt.common.utils;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

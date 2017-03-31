@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.core.branchbound.strategies;
+package ipt.lab.crypt.lab1.branchbound.strategies;
 
 public class ProbabilityThresholdStrategy implements BoundStrategy {
 

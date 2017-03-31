@@ -1,8 +1,8 @@
-package ipt.lab.crypt.lab1;
+package ipt.lab.crypt.lab1.attack;
 
-import ipt.lab.crypt.lab1.core.HeysAttacker;
+import ipt.lab.crypt.lab1.attack.HeysAttacker;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
-import ipt.lab.crypt.lab1.utils.PrintUtils;
+import ipt.lab.crypt.common.utils.PrintUtils;
 
 public class AttackRunner {
 

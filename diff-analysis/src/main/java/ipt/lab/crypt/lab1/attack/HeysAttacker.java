@@ -1,9 +1,10 @@
-package ipt.lab.crypt.lab1.core;
+package ipt.lab.crypt.lab1.attack;
 
+import ipt.lab.crypt.common.heys.HeysCipher;
+import ipt.lab.crypt.common.heys.HeysConsoleUtility;
+import ipt.lab.crypt.common.utils.PrintUtils;
+import ipt.lab.crypt.lab1.Constants;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
-import ipt.lab.crypt.lab1.heys.HeysCipher;
-import ipt.lab.crypt.lab1.heys.HeysConsoleUtility;
-import ipt.lab.crypt.lab1.utils.PrintUtils;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -24,12 +25,12 @@ public class HeysAttacker {
 
         textNumberEstimate = 3000;
 
-        HeysConsoleUtility attackedHeys = new HeysConsoleUtility(sBoxNumber);
+        HeysConsoleUtility attackedHeys = new HeysConsoleUtility(Constants.BASE_DIR, sBoxNumber);
 
         int[] allBlocks = IntStream.range(0, BLOCKS_NUMBER).toArray();
         int[] encryptedBlocks = attackedHeys.encrypt(allBlocks);
 
-        int[] usedBlocks = selectBlocksForAttack(encryptedBlocks, textNumberEstimate);
+        int[] usedBlocks = selectBlocksForAttack(textNumberEstimate);
 
         int[] reversePS = preComputeReversePSTable(sBoxNumber);
 
@@ -40,8 +41,7 @@ public class HeysAttacker {
 
             int coincides = 0;
 
-            for (int _block : usedBlocks) {
-                int block = _block & 0xFFFF;
+            for (int block : usedBlocks) {
                 int pairBlock = block ^ inputDiff;
 
                 int cipherText = encryptedBlocks[block];
@@ -71,22 +71,17 @@ public class HeysAttacker {
         return keyCandidate;
     }
 
-    private int[] selectBlocksForAttack(int[] encryptedBlocks, int textNumberEstimate) {
+    private int[] selectBlocksForAttack(int textNumberEstimate) {
         Random random = new Random();
-        Set<Integer> choosenBlocks = new HashSet<>();
+        Set<Integer> selectedBlocks = new HashSet<>(textNumberEstimate);
 
-        while (choosenBlocks.size() < textNumberEstimate) {
-            choosenBlocks.add(random.nextInt(encryptedBlocks.length));
+        while (selectedBlocks.size() < textNumberEstimate) {
+            selectedBlocks.add(random.nextInt(Constants.BLOCKS_NUMBER));
         }
 
-        int[] texts = new int[textNumberEstimate];
-        int i = 0;
-
-        for (int block : choosenBlocks) {
-            texts[i++] = block | (encryptedBlocks[block] << 16);
-        }
-
-        return texts;
+        return selectedBlocks.stream()
+                .mapToInt(i -> i)
+                .toArray();
     }
 
     private static int[] preComputeReversePSTable(int sBoxNumber) {

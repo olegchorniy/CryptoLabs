@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.utils;
+package ipt.lab.crypt.common.utils;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -21,12 +21,6 @@ public abstract class SerializationUtil {
     public static <T> T deserialize(Path srcFile, Class<T> resultClass) throws IOException {
         try (InputStream fis = Files.newInputStream(srcFile);
              Input input = new Input(fis, BUFF_SIZE)) {
-            return kryo.readObject(input, resultClass);
-        }
-    }
-
-    public static <T> T deserialize(byte[] bytes, Class<T> resultClass) throws IOException {
-        try (Input input = new Input(bytes)) {
             return kryo.readObject(input, resultClass);
         }
     }

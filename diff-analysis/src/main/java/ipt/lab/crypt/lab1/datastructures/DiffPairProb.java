@@ -1,6 +1,6 @@
 package ipt.lab.crypt.lab1.datastructures;
 
-import ipt.lab.crypt.lab1.utils.PrintUtils;
+import ipt.lab.crypt.common.utils.PrintUtils;
 
 public class DiffPairProb extends DiffProb {
 

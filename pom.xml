@@ -11,6 +11,7 @@
     
     <modules>
         <module>diff-analysis</module>
+        <module>common</module>
     </modules>
 
     <dependencyManagement>

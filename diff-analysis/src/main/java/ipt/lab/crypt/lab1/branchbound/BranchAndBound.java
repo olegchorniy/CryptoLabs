@@ -1,10 +1,10 @@
-package ipt.lab.crypt.lab1.core.branchbound;
+package ipt.lab.crypt.lab1.branchbound;
 
-import ipt.lab.crypt.lab1.core.DiffTableCounter;
-import ipt.lab.crypt.lab1.core.branchbound.strategies.BoundStrategy;
-import ipt.lab.crypt.lab1.core.branchbound.strategies.NoOpStrategy;
+import ipt.lab.crypt.lab1.difftable.DiffTableCounter;
+import ipt.lab.crypt.lab1.branchbound.strategies.BoundStrategy;
+import ipt.lab.crypt.lab1.branchbound.strategies.NoOpStrategy;
 import ipt.lab.crypt.lab1.datastructures.DiffProb;
-import ipt.lab.crypt.lab1.heys.HeysCipher;
+import ipt.lab.crypt.common.heys.HeysCipher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
