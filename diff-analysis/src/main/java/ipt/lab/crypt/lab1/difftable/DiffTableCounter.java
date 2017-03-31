@@ -6,27 +6,6 @@ import static ipt.lab.crypt.lab1.Constants.*;
 
 public class DiffTableCounter {
 
-    public static void main(String[] args) {
-        long[][] result = differentialProbabilities(new HeysCipher(6));
-
-        int total = 0;
-        int max = 0;
-
-        int a = 0;
-        for (long[] diffs : result) {
-
-            System.out.println((a++) + " : " + diffs.length);
-            total += diffs.length;
-
-            if (diffs.length > max) {
-                max = diffs.length;
-            }
-        }
-
-        System.out.println("max = " + max);
-        System.out.println("total = " + total);
-    }
-
     public static long[][] differentialProbabilities(HeysCipher heys) {
         //speedup probability compution with pre-computed SP-table
         int[] SP = preComputeSP(heys);

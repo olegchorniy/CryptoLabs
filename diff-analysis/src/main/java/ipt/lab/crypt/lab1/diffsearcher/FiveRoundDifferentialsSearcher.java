@@ -3,6 +3,7 @@ package ipt.lab.crypt.lab1.diffsearcher;
 import ipt.lab.crypt.common.utils.PrintUtils;
 import ipt.lab.crypt.lab1.Constants;
 import ipt.lab.crypt.lab1.branchbound.BranchAndBound;
+import ipt.lab.crypt.lab1.branchbound.strategies.ProbabilityThresholdStrategy;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
 import ipt.lab.crypt.lab1.datastructures.DiffProb;
 import ipt.lab.crypt.lab1.diffsearcher.blockgeneration.BlocksDistributor;
@@ -19,15 +20,19 @@ public class FiveRoundDifferentialsSearcher {
 
     private static final Comparator<DiffProb> descByProbComparator = (lv, rv) -> Double.compare(rv.getProb(), lv.getProb());
 
-    public static final Random rand = new Random();
-
     public static void main(String[] args) throws IOException {
+        StopWatch deserializationSW = new StopWatch();
+
+        System.out.println("Start diff table deserialization");
+        deserializationSW.start();
+
         DiffProbTableSource source = new FileDiffPropTableSource();
         long[][] roundDiffProbs = source.getDiffProbTable(Constants.VARIANT);
 
-        System.out.println("Deserialized");
+        deserializationSW.stop();
+        System.out.printf("Diff table deserialized in %d millis , start differentials search...%n", deserializationSW.getTime());
 
-        BranchAndBound bab = new BranchAndBound(roundDiffProbs/*, new ProbabilityThresholdStrategy(1.0 / (65535.0))*/);
+        BranchAndBound bab = new BranchAndBound(roundDiffProbs, new ProbabilityThresholdStrategy(10.0 / (65535.0)));
         BlocksDistributor blocks = new BlocksDistributor(2);
 
         for (int i = 0; i < 1; i++) {
