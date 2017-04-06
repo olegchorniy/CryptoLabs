@@ -1,17 +1,17 @@
 package ipt.lab.crypt.lab1.branchbound;
 
-import ipt.lab.crypt.lab1.difftable.DiffTableCounter;
+import ipt.lab.crypt.common.heys.HeysCipher;
+import ipt.lab.crypt.common.utils.BlockUtils;
 import ipt.lab.crypt.lab1.branchbound.strategies.BoundStrategy;
 import ipt.lab.crypt.lab1.branchbound.strategies.NoOpStrategy;
 import ipt.lab.crypt.lab1.datastructures.DiffProb;
-import ipt.lab.crypt.common.heys.HeysCipher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ipt.lab.crypt.lab1.Constants.BLOCKS_NUMBER;
+import static ipt.lab.crypt.common.heys.HeyConstants.BLOCKS_NUMBER;
 
 public class BranchAndBound {
 
@@ -57,8 +57,8 @@ public class BranchAndBound {
                 }
 
                 for (long blockAndProb : roundDiffProbs[inputDiff]) {
-                    int diff = DiffTableCounter.unpackBlock(blockAndProb);
-                    int freq = DiffTableCounter.unpackCounter(blockAndProb);
+                    int diff = BlockUtils.unpackBlock(blockAndProb);
+                    int freq = BlockUtils.unpackCounter(blockAndProb);
 
                     double currentProb = nextDiffProbs[diff];
                     if (currentProb < 0) {

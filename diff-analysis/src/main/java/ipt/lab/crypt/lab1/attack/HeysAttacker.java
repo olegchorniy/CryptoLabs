@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static ipt.lab.crypt.lab1.Constants.BLOCKS_NUMBER;
+import static ipt.lab.crypt.common.heys.HeyConstants.BLOCKS_NUMBER;
 
 public class HeysAttacker {
 
@@ -76,7 +76,7 @@ public class HeysAttacker {
         Set<Integer> selectedBlocks = new HashSet<>(textNumberEstimate);
 
         while (selectedBlocks.size() < textNumberEstimate) {
-            selectedBlocks.add(random.nextInt(Constants.BLOCKS_NUMBER));
+            selectedBlocks.add(random.nextInt(BLOCKS_NUMBER));
         }
 
         return selectedBlocks.stream()

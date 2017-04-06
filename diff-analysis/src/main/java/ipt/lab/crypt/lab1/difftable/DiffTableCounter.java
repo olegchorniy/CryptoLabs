@@ -2,7 +2,8 @@ package ipt.lab.crypt.lab1.difftable;
 
 import ipt.lab.crypt.common.heys.HeysCipher;
 
-import static ipt.lab.crypt.lab1.Constants.*;
+import static ipt.lab.crypt.common.heys.HeyConstants.BLOCKS_NUMBER;
+import static ipt.lab.crypt.common.utils.BlockUtils.pack;
 
 public class DiffTableCounter {
 
@@ -54,17 +55,5 @@ public class DiffTableCounter {
         }
 
         return SP;
-    }
-
-    public static long pack(int block, int counter) {
-        return block | (counter << BLOCKS_SIZE);
-    }
-
-    public static int unpackBlock(long packedValue) {
-        return (int) (packedValue & BLOCK_MASK);
-    }
-
-    public static int unpackCounter(long packedValue) {
-        return (int) (packedValue >>> BLOCKS_SIZE);
     }
 }

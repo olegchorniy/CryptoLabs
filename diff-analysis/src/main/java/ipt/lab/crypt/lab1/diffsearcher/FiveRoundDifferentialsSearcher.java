@@ -14,7 +14,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.io.IOException;
 import java.util.*;
 
-import static ipt.lab.crypt.lab1.Constants.BLOCKS_NUMBER;
+import static ipt.lab.crypt.common.heys.HeyConstants.BLOCKS_NUMBER;
 
 public class FiveRoundDifferentialsSearcher {
 
