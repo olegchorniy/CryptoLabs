@@ -32,7 +32,7 @@ public class FiveRoundDifferentialsSearcher {
         deserializationSW.stop();
         System.out.printf("Diff table deserialized in %d millis , start differentials search...%n", deserializationSW.getTime());
 
-        BranchAndBound bab = new BranchAndBound(roundDiffProbs, new ProbabilityThresholdStrategy(10.0 / (65535.0)));
+        BranchAndBound bab = new BranchAndBound(roundDiffProbs, new ProbabilityThresholdStrategy(2.0 / (65535.0)));
         BlocksDistributor blocks = new BlocksDistributor(2);
 
         for (int i = 0; i < 1; i++) {
@@ -89,13 +89,22 @@ public class FiveRoundDifferentialsSearcher {
         double maxProb = diffProbs[1];
 
         for (int diff = 2; diff < BLOCKS_NUMBER; diff++) {
-            if (diffProbs[diff] > maxProb) {
+            if (allSubBlocksActive(diff) && diffProbs[diff] > maxProb) {
                 maxProb = diffProbs[diff];
                 maxDiff = diff;
             }
         }
 
         return new DiffProb(maxDiff, maxProb);
+    }
+
+    private static boolean allSubBlocksActive(int diff) {
+        // @formatter:off
+        return  ( diff        & 0xF) != 0 &&
+                ((diff >>  4) & 0xF) != 0 &&
+                ((diff >>  8) & 0xF) != 0 &&
+                ((diff >> 12) & 0xF) != 0;
+        // @formatter:on
     }
 
     private static List<DiffProb> toSortedList(double[] diffProbs) {
