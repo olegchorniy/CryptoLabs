@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.diffsearcher.blockgeneration;
+package ipt.lab.crypt.common.blockgeneration;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;

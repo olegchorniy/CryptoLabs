@@ -1,6 +1,6 @@
 package ipt.lab.crypt.lab1.difftable.probsource;
 
-import ipt.lab.crypt.lab1.Constants;
+import ipt.lab.crypt.common.Constants;
 import ipt.lab.crypt.common.utils.SerializationUtil;
 
 import java.io.IOException;

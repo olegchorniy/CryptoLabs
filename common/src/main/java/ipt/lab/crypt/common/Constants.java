@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1;
+package ipt.lab.crypt.common;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

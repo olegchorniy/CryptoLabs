@@ -1,6 +1,6 @@
 package ipt.lab.crypt.lab1.misc;
 
-import ipt.lab.crypt.lab1.Constants;
+import ipt.lab.crypt.common.Constants;
 import ipt.lab.crypt.common.heys.HeysCipher;
 import ipt.lab.crypt.common.utils.PrintUtils;
 

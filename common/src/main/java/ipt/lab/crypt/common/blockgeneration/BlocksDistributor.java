@@ -1,4 +1,4 @@
-package ipt.lab.crypt.lab1.diffsearcher.blockgeneration;
+package ipt.lab.crypt.common.blockgeneration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class BlocksDistributor {
     }
 
     public Optional<Integer> getIfAvailable() {
-        int index = this.counter.incrementAndGet();
+        int index = this.counter.getAndIncrement();
         if (index < blocks.size()) {
             return Optional.of(blocks.get(index));
         }

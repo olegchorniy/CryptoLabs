@@ -1,12 +1,12 @@
 package ipt.lab.crypt.lab1.diffsearcher;
 
+import ipt.lab.crypt.common.Constants;
+import ipt.lab.crypt.common.blockgeneration.BlocksDistributor;
 import ipt.lab.crypt.common.utils.PrintUtils;
-import ipt.lab.crypt.lab1.Constants;
 import ipt.lab.crypt.lab1.branchbound.BranchAndBound;
 import ipt.lab.crypt.lab1.branchbound.strategies.ProbabilityThresholdStrategy;
 import ipt.lab.crypt.lab1.datastructures.DiffPairProb;
 import ipt.lab.crypt.lab1.datastructures.DiffProb;
-import ipt.lab.crypt.lab1.diffsearcher.blockgeneration.BlocksDistributor;
 import ipt.lab.crypt.lab1.difftable.probsource.DiffProbTableSource;
 import ipt.lab.crypt.lab1.difftable.probsource.FileDiffPropTableSource;
 import org.apache.commons.lang3.time.StopWatch;
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static ipt.lab.crypt.common.heys.HeyConstants.BLOCKS_NUMBER;
+import static ipt.lab.crypt.common.utils.BlockUtils.allSubBlocksActive;
 
 public class FiveRoundDifferentialsSearcher {
 
@@ -96,15 +97,6 @@ public class FiveRoundDifferentialsSearcher {
         }
 
         return new DiffProb(maxDiff, maxProb);
-    }
-
-    private static boolean allSubBlocksActive(int diff) {
-        // @formatter:off
-        return  ( diff        & 0xF) != 0 &&
-                ((diff >>  4) & 0xF) != 0 &&
-                ((diff >>  8) & 0xF) != 0 &&
-                ((diff >> 12) & 0xF) != 0;
-        // @formatter:on
     }
 
     private static List<DiffProb> toSortedList(double[] diffProbs) {
