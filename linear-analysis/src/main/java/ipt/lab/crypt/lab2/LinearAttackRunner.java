@@ -19,8 +19,8 @@ public class LinearAttackRunner {
       - a = 000c, b = 2222, LP = 0,00013905
      -- a = 0c0c, b = 4264, LP = 0,00003
          */
-        int a = 0x0c0c;
-        int b = 0x4264;
+        int a = 0x0020;
+        int b = 0x0110;
 
         LinearAttacker attacker = new LinearAttacker(Constants.VARIANT);
         int key = attacker.attackKey(a, b);

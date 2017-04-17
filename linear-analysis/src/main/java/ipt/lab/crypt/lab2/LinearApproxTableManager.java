@@ -1,14 +1,14 @@
 package ipt.lab.crypt.lab2;
 
+import ipt.lab.crypt.common.Constants;
 import ipt.lab.crypt.common.utils.SerializationUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class LinearApproxTableManager {
 
-    public static final Path probsDir = Paths.get("D:", "work_dir", "crypt", "approx_tables");
+    public static final Path probsDir = Constants.BASE_DIR.resolve("approx_tables");
 
     public static int[][] getTable(int sBoxNumber) {
         try {
