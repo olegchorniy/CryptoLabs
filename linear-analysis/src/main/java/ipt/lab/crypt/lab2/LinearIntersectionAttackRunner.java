@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ipt.lab.crypt.lab2.LinearPotentialsSearch.PAIRS_PATH;
@@ -27,14 +27,16 @@ public class LinearIntersectionAttackRunner {
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         LinearApproxList approximations = SerializationUtil.deserialize(PAIRS_PATH, LinearApproxList.class);
-        BlockingQueue<Entry<Integer, Integer>> tasks = new LinkedBlockingQueue<>(toPairs(approximations));
 
-        LongAdder approxTried = new LongAdder();
+        List<Entry<Integer, Integer>> pairs = toPairs(approximations);
+        Collections.shuffle(pairs);
+
+        BlockingQueue<Entry<Integer, Integer>> tasks = new LinkedBlockingQueue<>(pairs);
+        BlockingQueue<NavigableMap<Integer, Set<Integer>>> intermediateResults = new LinkedBlockingQueue<>();
 
         for (int i = 0; i < CONCURRENCY; i++) {
+            //worker threads
             new Thread(() -> {
-
-                Map<Integer, Integer> hits = new HashMap<>();
 
                 LinearAttacker attacker = new LinearAttacker(Constants.VARIANT);
                 StopWatch sw = new StopWatch();
@@ -57,22 +59,12 @@ public class LinearIntersectionAttackRunner {
                             .invert()
                             .groupingTo(TreeMap::new, HashSet::new);
 
-                    counterToKeys
-                            .lastEntry()
-                            .getValue()
-                            .forEach(key -> incCounter(hits, key));
+                    intermediateResults.add(counterToKeys);
 
-                    approxTried.increment();
-
-                    System.out.printf("[%s] #%d, a = %s, b = %s, hits map = %s, time = %d%n",
+                    System.out.printf("[%s] a = %s, b = %s, time = %d%n",
                             Thread.currentThread().getName(),
-                            approxTried.sum(),
                             PrintUtils.toHexAsShort(a),
                             PrintUtils.toHexAsShort(b),
-                            EntryStream.of(hits)
-                                    .sorted(Entry.<Integer, Integer>comparingByValue().reversed())
-                                    .limit(100)
-                                    .toList(),
                             sw.getTime()
                     );
 
@@ -80,6 +72,41 @@ public class LinearIntersectionAttackRunner {
                 }
             }).start();
         }
+
+        // updater thread
+        new Thread(() -> {
+
+            Map<Integer, Integer> hits = new HashMap<>();
+            Consumer<Integer> incrementer = key -> incCounter(hits, key);
+
+            int approxTried = 0;
+
+            try {
+                while (true) {
+
+                    Iterator<Entry<Integer, Set<Integer>>> keyCountersIt = intermediateResults.take()
+                            .descendingMap()
+                            .entrySet()
+                            .iterator();
+
+                    for (int i = 0; i < 15 && keyCountersIt.hasNext(); i++) {
+                        keyCountersIt.next().getValue().forEach(incrementer);
+                    }
+
+                    System.out.printf("[%s] #%d, hits = %s%n",
+                            "Updater thread",
+                            ++approxTried,
+                            EntryStream.of(hits)
+                                    .sorted(Entry.<Integer, Integer>comparingByValue().reversed())
+                                    .limit(100)
+                                    .map(e -> String.format("%s = %d", PrintUtils.toHexAsShort(e.getKey()), e.getValue()))
+                                    .collect(Collectors.joining(", ", "[", "]"))
+                    );
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private static void incCounter(Map<Integer, Integer> counterMap, int key) {
