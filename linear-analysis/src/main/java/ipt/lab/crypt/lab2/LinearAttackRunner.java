@@ -1,15 +1,24 @@
 package ipt.lab.crypt.lab2;
 
+import com.google.gson.reflect.TypeToken;
 import ipt.lab.crypt.common.Constants;
+import ipt.lab.crypt.common.utils.BlockUtils;
 import ipt.lab.crypt.common.utils.PrintUtils;
 import ipt.lab.crypt.common.utils.SerializationUtil;
+import one.util.streamex.EntryStream;
 import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.Collectors;
 
 import static ipt.lab.crypt.lab2.LinearPotentialsSearch.PAIRS_PATH;
 
@@ -30,89 +39,125 @@ public class LinearAttackRunner {
  -- a = 0c0c, b = 4264, LP = 0,00003
      */
 
-    private static final ThreadLocal<LinearAttacker> attackerThreadLocal = new ThreadLocal<LinearAttacker>() {
+    public static final Path MAPS_DIR = Constants.BASE_DIR.resolve("maps");
 
-        @Override
-        protected LinearAttacker initialValue() {
-            System.out.println("New attacker instance, thread = " + Thread.currentThread().getName());
-            return new LinearAttacker(Constants.VARIANT);
-        }
+    public static final TypeToken<? extends Pair<Map<Integer, Integer>, Map<Integer, Integer>>> MAPS_PAIR_TYPE
+            = new TypeToken<MutablePair<Map<Integer, Integer>, Map<Integer, Integer>>>() {
     };
 
-    public static void main(String[] args) {
-        List<Pair<Integer, Integer>> candidates = attackerThreadLocal.get().attackKey(0x8000, 0x2222);
+    private static final int ACTUAL_KEY = 0x26e4;
+    private static final int CONCURRENCY = 3;
 
-        System.out.println(candidates);
-    }
-
-    public static void bruteForce(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         LinearApproxList approximations = SerializationUtil.deserialize(PAIRS_PATH, LinearApproxList.class);
 
-        int actualKey = 0x26e4;
+        for (LinearApproxList.LinearApprox a : approximations) {
+            a.getBetas().stream()
+                    .filter(p -> BlockUtils.allSubBlocksActive(p.getKey()))
+                    .forEach(p -> {
+                        System.out.printf(
+                                "a = %s, b = %s, LP = %.7f%n",
+                                PrintUtils.toHexAsShort(a.getA()),
+                                PrintUtils.toHexAsShort(p.getKey()),
+                                p.getValue()
+                        );
+                    });
+        }
 
-        LongAdder hits = new LongAdder();
+        if (true) return;
+
+        BlockingQueue<Entry<Integer, Integer>> tasks = new LinkedBlockingQueue<>(toPairs(approximations));
+
         LongAdder approxTried = new LongAdder();
 
-        //LinearAttacker attacker = new LinearAttacker(Constants.VARIANT);
+        ExecutorService executor = Executors.newFixedThreadPool(CONCURRENCY);
+        List<Future<Pair<Map<Integer, Integer>, Map<Integer, Integer>>>> results = new ArrayList<>();
 
-        approximations.stream()
-                .flatMap(approx -> StreamEx.of(approx.getA()).cross(approx.getBetas()))
-                //.parallel()
-                .skip(345)
-                .forEach(e -> {
-                    int a = e.getKey();
-                    int b = e.getValue().getKey();
+        for (int i = 0; i < CONCURRENCY; i++) {
+            results.add(executor.submit(() -> {
 
-                    StopWatch sw = new StopWatch();
+                Map<Integer, Integer> actualKeyPositions = new HashMap<>();
+                Map<Integer, Integer> skippedKeysAmounts = new HashMap<>();
 
-                    sw.start();
-                    List<Pair<Integer, Integer>> candidates = attackerThreadLocal.get().attackKey(a, b);
-                    sw.stop();
+                LinearAttacker attacker = new LinearAttacker(Constants.VARIANT);
+                StopWatch sw = new StopWatch();
 
-                    approxTried.increment();
-                    if (candidates.stream().anyMatch(candidate -> candidate.getKey() == actualKey)) {
-                        hits.increment();
+                while (true) {
+
+                    Entry<Integer, Integer> head = tasks.poll();
+                    if (head == null) {
+                        break;
                     }
 
-                    System.out.printf("Try #%d, a = %s, b = %s, candidates = %d, time = %d | hits = %d%n",
+                    int a = head.getKey();
+                    int b = head.getValue();
+
+                    sw.start();
+                    Map<Integer, Integer> candidates = attacker.attackKey(a, b);
+                    sw.stop();
+
+                    NavigableMap<Integer, Set<Integer>> counterToKeys = EntryStream.of(candidates)
+                            .invert()
+                            .groupingTo(TreeMap::new, HashSet::new);
+
+                    int actualKeyPosition = 0;
+                    int skippedKeysAmount = 0;
+
+                    for (Integer counter : counterToKeys.descendingKeySet()) {
+                        actualKeyPosition++;
+
+                        Set<Integer> keys = counterToKeys.get(counter);
+
+                        if (keys.contains(ACTUAL_KEY)) {
+                            break;
+                        } else {
+                            skippedKeysAmount += keys.size();
+                        }
+                    }
+
+                    incCounter(skippedKeysAmounts, skippedKeysAmount);
+                    incCounter(actualKeyPositions, actualKeyPosition);
+
+                    approxTried.increment();
+
+                    System.out.printf("#%d, a = %s, b = %s, candidates = %d, key position = %d, skipped keys = %d, time = %d%n",
                             approxTried.sum(),
                             PrintUtils.toHexAsShort(a),
                             PrintUtils.toHexAsShort(b),
                             candidates.size(),
-                            sw.getTime(),
-                            hits.sum()
+                            actualKeyPosition,
+                            skippedKeysAmount,
+                            sw.getTime()
                     );
 
                     sw.reset();
-                });
-
-        /*for (LinearApprox approx : approximations) {
-            int a = approx.getA();
-
-            for (Pair<Integer, Double> pair : approx.getBetas()) {
-                int b = pair.getKey();
-
-                sw.start();
-                List<Pair<Integer, Integer>> candidates = attacker.attackKey(a, b);
-                sw.stop();
-
-                approxTried++;
-                if (candidates.stream().anyMatch(candidate -> candidate.getKey() == actualKey)) {
-                    hits++;
                 }
 
-                System.out.printf("Trie #%d, a = %s, b = %s, time = %d | hits = %d%n",
-                        approxTried,
-                        PrintUtils.toHexAsShort(a),
-                        PrintUtils.toHexAsShort(b),
-                        sw.getTime(),
-                        hits
-                );
+                return MutablePair.of(actualKeyPositions, skippedKeysAmounts);
+            }));
+        }
 
-                sw.reset();
-            }
-        }*/
+        for (Future<Pair<Map<Integer, Integer>, Map<Integer, Integer>>> future : results) {
+            //JsonUtil.serialize(tempFile(), future.get());
+            System.out.println(future.get());
+        }
 
-        System.out.printf("Tries: %d, hits: %d%n", approxTried.sum(), hits.sum());
+        executor.shutdown();
+    }
+
+    private static Path tempFile() throws IOException {
+        return Files.createTempFile(MAPS_DIR, null, ".json");
+    }
+
+    private static void incCounter(Map<Integer, Integer> counterMap, int key) {
+        counterMap.put(key, counterMap.getOrDefault(key, 0) + 1);
+    }
+
+    private static List<Entry<Integer, Integer>> toPairs(LinearApproxList approximations) {
+        return EntryStream.of(
+                StreamEx.of(approximations).flatMap(approx -> StreamEx.of(approx.getA()).cross(approx.getBetas()))
+        )
+                .mapValues(Pair::getKey)
+                .collect(Collectors.toList());
     }
 }

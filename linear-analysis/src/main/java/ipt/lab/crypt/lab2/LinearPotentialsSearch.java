@@ -107,6 +107,7 @@ public class LinearPotentialsSearch {
     }
 
     public static List<Entry<Integer, Double>> topN(double[] values, int n) {
+        //TODO: may be replaced with EntryStream#of
         Stream<Integer> indStream = IntStreamEx.range(0, values.length).boxed();
         Stream<Double> valStream = Arrays.stream(values).boxed();
 

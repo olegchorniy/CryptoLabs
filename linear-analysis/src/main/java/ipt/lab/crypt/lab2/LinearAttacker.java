@@ -4,11 +4,9 @@ import ipt.lab.crypt.common.Constants;
 import ipt.lab.crypt.common.heys.HeyConstants;
 import ipt.lab.crypt.common.heys.HeysCipher;
 import ipt.lab.crypt.common.heys.HeysConsoleUtility;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static ipt.lab.crypt.common.heys.HeyConstants.BLOCKS_NUMBER;
@@ -26,11 +24,9 @@ public class LinearAttacker {
         this.reversePS = preComputeReversePSTable(sBoxNumber);
     }
 
-    public List<Pair<Integer, Integer>> attackKey(int a, int b) {
+    public Map<Integer, Integer> attackKey(int a, int b) {
 
-        List<Pair<Integer, Integer>> keyAndUPairs = new ArrayList<>();
-
-        int maxU = 0;
+        Map<Integer, Integer> keyAndU = new HashMap<>();
 
         for (int key = 0; key < BLOCKS_NUMBER; key++) {
             int counter = 0;
@@ -46,18 +42,10 @@ public class LinearAttacker {
             }
 
             int u = Math.abs(2 * counter - HeyConstants.BLOCKS_NUMBER);
-            if (u > maxU) {
-                maxU = u;
-            }
-
-            keyAndUPairs.add(Pair.of(key, u));
+            keyAndU.put(key, u);
         }
 
-        final int finalMaxU = maxU;
-
-        return keyAndUPairs.stream()
-                .filter(keyAndU -> keyAndU.getValue() == finalMaxU)
-                .collect(Collectors.toList());
+        return keyAndU;
     }
 
     private static int[] preComputeReversePSTable(int sBoxNumber) {
