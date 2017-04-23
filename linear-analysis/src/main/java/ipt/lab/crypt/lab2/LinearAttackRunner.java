@@ -2,7 +2,6 @@ package ipt.lab.crypt.lab2;
 
 import com.google.gson.reflect.TypeToken;
 import ipt.lab.crypt.common.Constants;
-import ipt.lab.crypt.common.utils.BlockUtils;
 import ipt.lab.crypt.common.utils.PrintUtils;
 import ipt.lab.crypt.common.utils.SerializationUtil;
 import one.util.streamex.EntryStream;
@@ -50,22 +49,6 @@ public class LinearAttackRunner {
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         LinearApproxList approximations = SerializationUtil.deserialize(PAIRS_PATH, LinearApproxList.class);
-
-        for (LinearApproxList.LinearApprox a : approximations) {
-            a.getBetas().stream()
-                    .filter(p -> BlockUtils.allSubBlocksActive(p.getKey()))
-                    .forEach(p -> {
-                        System.out.printf(
-                                "a = %s, b = %s, LP = %.7f%n",
-                                PrintUtils.toHexAsShort(a.getA()),
-                                PrintUtils.toHexAsShort(p.getKey()),
-                                p.getValue()
-                        );
-                    });
-        }
-
-        if (true) return;
-
         BlockingQueue<Entry<Integer, Integer>> tasks = new LinkedBlockingQueue<>(toPairs(approximations));
 
         LongAdder approxTried = new LongAdder();
