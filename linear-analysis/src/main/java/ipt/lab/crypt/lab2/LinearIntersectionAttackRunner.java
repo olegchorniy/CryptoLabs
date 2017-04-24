@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import static ipt.lab.crypt.lab2.LinearPotentialsSearch.PAIRS_PATH;
 
-@SuppressWarnings("Duplicates")
 public class LinearIntersectionAttackRunner {
 
     private static final int ACTUAL_KEY = 0x26e4;
@@ -89,7 +88,7 @@ public class LinearIntersectionAttackRunner {
                             .entrySet()
                             .iterator();
 
-                    for (int i = 0; i < 15 && keyCountersIt.hasNext(); i++) {
+                    for (int i = 0; i < 10 && keyCountersIt.hasNext(); i++) {
                         keyCountersIt.next().getValue().forEach(incrementer);
                     }
 
